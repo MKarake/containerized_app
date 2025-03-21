@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+
+  frontend: # Defines the frontend service.
+    build: ./frontend  # Builds the frontend Docker image from frontend/Dockerfile
+    ports:
+      - "8080:80"  # Map frontend container’s port 80 to host’s 8080  so we access it through http://localhost:8080
+    depends_on:
+      - backend  # Waits for the backend before running
+
+  backend: # Defines the backend service.
+    build: ./backend  # Builds the FastAPI backend from backend/Dockerfile
+    ports:
+      - "8000:8000"  #  Backend available on port 8000 so we access it through http://localhost:8000
+    depends_on:
+      db: #Ensures the database starts before backend.
+        condition: service_healthy  # Start only after DB is ready
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:password@db:5432/mydatabase  #  Database connection string
+
+  db:
+    image: postgres:13  # Uses official PostgreSQL image
+    restart: always  #  Restart if container crashes
+    environment:
+      POSTGRES_USER: postgres  # PostgreSQL username
+      POSTGRES_PASSWORD: password  # PostgreSQL password
+      POSTGRES_DB: mydatabase  #  name of the database
+    volumes:                                                #without volume the database would start but empty
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql  #  Automatically runs your init.sql on first launch so it takes the init.sql created locally and put it in the container , exactly in the folder /docker-entrypoint-initdb.d/."
+    ports:
+      - "5432:5432"  # PostgreSQL available on port 5432
+    healthcheck:  #  Ensure database is ready before backend starts
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mydatabase"]
+      interval: 5s #Run this test every 5s
+      retries: 5 # try up to 5 times
+      start_period: 10s # give the container 10 sec before starting the health check
