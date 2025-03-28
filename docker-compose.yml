@@ -35,3 +35,13 @@ services:
       interval: 5s #Run this test every 5s
       retries: 5 # try up to 5 times
       start_period: 10s # give the container 10 sec before starting the health check
+    
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml  # ✅ Mount custom config file
+    ports:
+      - "9090:9090"  # ✅ Prometheus UI will be available at http://localhost:9090
+    depends_on:
+      - backend  # ✅ Prometheus should wait for backend to start

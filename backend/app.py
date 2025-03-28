@@ -4,11 +4,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.exc import NoResultFound
 from pydantic import BaseModel  
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from database import get_db, engine, wait_for_db
 from models import Item, Base
 
 app = FastAPI()
+Instrumentator().instrument(app).expose(app)
+
 
 #  Enable CORS for frontend-backend communication
 app.add_middleware(
@@ -22,7 +25,8 @@ app.add_middleware(
 #  Define a request model for Item creation/update
 class ItemRequest(BaseModel):
     name: str
-    description: str
+    description: str  
+    
 
 @app.on_event("startup")
 async def startup():
