@@ -26,8 +26,6 @@ services:
       POSTGRES_DB: mydatabase  #  name of the database
     volumes:                                                #without volume the database would start but empty
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql  #  Automatically runs your init.sql on first launch so it takes the init.sql created locally and put it in the container , exactly in the folder /docker-entrypoint-initdb.d/."
-    ports:
-      - "5432:5432"  # PostgreSQL available on port 5432
     healthcheck:  #  Ensure database is ready before backend starts
       test: ["CMD-SHELL", "pg_isready -U postgres -d mydatabase"]
       interval: 5s #Run this test every 5s
