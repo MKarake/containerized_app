@@ -3,3 +3,5 @@ uvicorn
 asyncpg
 sqlalchemy
 prometheus_fastapi_instrumentator
+pytest
+requests
